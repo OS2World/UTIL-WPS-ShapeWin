@@ -1,0 +1,55 @@
+
+treyes                  OS/2 User's Manual                  treyes
+
+NAME
+
+    treyes - 'xeyes' (with shape extension) look-a-like
+
+SYNOPSIS
+
+    treyes [ -option ...]
+
+DESCRIPTION
+
+    Shows eyes track mouse, with transparent background.
+
+    You can control this program by
+
+    o Push Right Button         Raise Window
+    o Push Left  Button         Show Menu
+    o Drag with Left Button     Move Window
+    
+        Note:   It takes a lot time from start drag (left button down) 
+	        to draw frame appears.
+    
+    From menu, you can
+
+        +-----+
+	|Move |         Move Eyes
+        +-----+
+	|Size |         Resize Eyes
+        +-----+
+	|Hide |         Hide Eyes
+        +-----+
+        |Exit |         terminate Program
+        +-----+
+    
+    When resizing, after selection of menu, resizing pointer appears on 
+    border or corner to where you moved mouse.
+
+OPTIONS
+
+    -x #        Specify Horizontal Position
+    -y #        Specify Vertical   Position
+    -w #        Specify Width  of the Eyes
+    -h #        Specify Height of the Eyes
+
+    Default size and position will be
+    
+        Position        near at mouse position
+	Size            8-th of screen size
+
+Warning
+
+    This program consumes lot of system resources (CPU and memory), so
+    don't try large size.

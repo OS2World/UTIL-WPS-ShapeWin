@@ -1,0 +1,45 @@
+
+trbitmap                OS/2 User's Manual                  trbitmap
+
+NAME
+
+    trbitmap - show bitmap with transparent background
+
+SYNOPSIS
+
+    trbitmap bitmap-file
+
+DESCRIPTION
+
+    Show bitmap on your desktop with transparent background.  It assumes
+    color of lower left corner (0, 0) as background color, and pixels
+    having same color as background.  As result, picture other than
+    background color will appear on your desktop.
+
+    You can control this program by
+
+    o Push Right Button         Raise Window
+    o Push Left  Button         Show Menu
+    o Drag with Left Button     Move Window
+    
+        Note:   It takes a lot time from start drag (left button down) 
+	        to draw frame appears.
+    
+    From menu, you can
+
+        +-----+
+	|Hide |         Hide Window (picture)
+        +-----+
+        |Exit |         terminate Program
+        +-----+
+
+Warning
+
+    This program consumes lot of system resources (CPU and memory), so
+    if you want to use
+
+        Large Bitmap
+	Complex Bitmap
+    
+    system will slow down.  Practical limit will depend on your machine.
+    So first try with small and simple bitmaps.

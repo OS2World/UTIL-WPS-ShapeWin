@@ -1,0 +1,26 @@
+/*
+ * tranime.rc - resources for Bitmap Animation
+ */
+
+#include <os2.h>
+#include "tranires.h"
+
+ICON    ID_TRANIME     tranime.ico
+
+DLGTEMPLATE     ID_CONTROL
+BEGIN
+    DIALOG "Animate Bitmap", -1, 0, 0, 104, 48,
+                WS_VISIBLE | FS_DLGBORDER,
+                FCF_TITLEBAR | FCF_SYSMENU | FCF_MINBUTTON | FCF_TASKLIST
+    BEGIN
+        LTEXT       "Step",  -1, 2, 34, 40, 12
+	ENTRYFIELD  "", IDC_STEP,  44, 34, 56, 12, ES_RIGHT
+
+	LTEXT       "Delay", -1, 2, 20, 40, 12
+	ENTRYFIELD  "", IDC_DELAY, 44, 20, 56, 12, ES_RIGHT
+
+	PUSHBUTTON  "Run",  IDC_RUN,   2,  2,  32, 16
+	PUSHBUTTON  "Stop", IDC_STOP, 36,  2,  32, 16
+	PUSHBUTTON  "Exit", IDC_EXIT, 70,  2,  32, 16
+    END
+END

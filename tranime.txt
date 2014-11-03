@@ -1,0 +1,70 @@
+
+tranime                 OS/2 User's Manual                  tranime
+
+NAME
+
+    tranime - animate with several transparent bitmaps
+
+SYNOPSIS
+
+    tranime bitmap-file ...
+
+DESCRIPTION
+
+    Show animations with bitmap files specified in command line.
+    
+    When start this program, first control dialog appears.
+    
+        It takes lot time if you specified many/large bitmaps.
+
+    Control dialog looks like below.
+
+        +---+-----------------+---+ 
+	|   |  Animate Bitmap |   |
+        +---+-----------------+---+ 
+	|       +---------------+ |
+        | Step  |             20| |
+	|       +---------------+ |
+	|       +---------------+ |
+        | Dealy |            500| |
+	|       +---------------+ |
+        | +-----+ +-----+ +-----+ | 
+	| | Run | |Stop | |Exit | |
+        | +-----+ +-----+ +-----+ | 
+        +-------------------------+
+    
+    where, set
+
+        Step        next picture will placed 'step' pixels right.  If
+                    step was minus, next picture will placed left side.
+		    And also step was 0, picture will placed same
+                    position.
+        Delay       time in mili-sec between next picture.  If it was
+                    too short, it requires lot of CPU cycle.
+
+    and
+    
+        Run         start animation
+	Stop        stop  animation
+	Exit        terminate program
+
+    Control dialog and animation have same Z-order.  If you place
+    control dialog at top, animations also on top.  And if you select
+    another window as top, animation moved below such windows.
+
+Problems
+
+    If 'step' was short, previous image remains a while.  If you known
+    good method to avoid it without mashine load, ley me know.
+
+
+Warning
+
+    This program consumes lot of system resources (CPU and memory), so
+    if you want to use
+
+        Large Bitmap
+	Complex Bitmap
+    
+    system will slow down.  Practical limit will depend on your machine.
+    So first try with small and simple bitmaps.

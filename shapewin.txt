@@ -1,0 +1,224 @@
+
+                ShapeWin - non-rectangular window support
+
+        Copyright (C) 1998, 1999 Software Research Associates, Inc.
+
+                    akira@sra.co.jp
+
+1. Introduction
+
+    It is bit hard for OS/2 PM to display images on desktop without 
+    window rectangle.
+
+        Once, I tried such program and failed.  Copying some area of
+        desktop and write images over it, it seems as drawing desktop
+        direct, but if background was changed, unmatched background
+        appears.
+
+    Then, I read Shape Extension code of X server, and astonished at its
+    simple implementation, and thought it may be implemented on PM. 
+    Now, I implemented shape extension look-alike on PM, and release to
+    public.
+
+2. Creating Shape Window
+
+2.1. Registering Window Class
+
+    Shape Window was implemented as custom control (widget). To use it,
+    you need to register window class with 'WinRegisterClass'.
+    
+        WinRegisterClass(
+	    hab,                Anchor Block Handle
+	    ShapeWinName,       Class Name
+	    ShapeWinProc,       Window Procedure
+	    0L,                 Default Window Style
+	    sizeof(PVOID)) ;    Class Data Size
+        
+    Class name and window procedure is defined in 'shapewin.h'.  But
+    class name may be another name.  Class data size should be above
+    size.
+
+2.2. Create Shape Window
+
+    You can create Shape Window with 'WinCreateWindow' as normal windows.
+    But you should note followings.
+
+    o To display shape (non-rectangular) window on your desktop, parent
+      window should be DESKTOP.  Otherwise, shape window will displayed
+      in another normal (rectanglar) window.
+
+    o For normal PM programs, top level window is frame window (or sub-
+      classed frame window).  Shape window itself don't have function
+      corresponds to frame window.  So using shape window as top level
+      window is danger.
+
+    o According to above two, you should use frame window as top level
+      window, and create shape window with frame window as owner window.
+      But in this method, you should sub-class frame window and append
+      some message processing (described later).
+
+    o Control Data is required to create shape window (cannot omit). 
+      Detail of control data will describe later.
+
+    o Size of shape window is defined by control data and you cannot
+      change it size later.  Also, size parameters in WinCreateWindow
+      is ignored.
+
+2.3. Shape Control Data
+
+    Size, shape and contents of shape window is defined with control
+    data.
+
+        You can change contents of shape window after, but you cannot
+	change shape and size of shape window.
+
+    Control data for shape window is defined below (shapewin.h).
+    
+    typedef struct _SHAPEWIN {
+        SHORT   cx, cy  ;       Size of Shape
+        HPS     hpsMask ;       Mask Pattern (as Shape)
+        HPS     hpsDraw ;       Source of Drawing Data
+    } SHAPEWIN, *PSHAPEWIN ;
+
+    cx * cy image in a presentation space 'hpsMask' determines shape of
+    shape window (as mask pattern).  And image in a presentation space 
+    'hpsDraw' will  written to shape window (drawing data).
+
+2.4. Mask Pattern
+
+    Shape window uses image in 'hpsMask' as mask pattern.  It assumes
+    color at pixel (0, 0) as background color, and area of another color
+    as shape of drawing area.
+    
+    Usually, fill memory PS with background color and draw any image
+    over it.  If background color is not in drawing area, you may use
+    same memory PS as both mask pattern and drawing data.
+
+        Samples programs all uses this method.
+    
+    There is no limit for size of mask pattern.  But using large image,
+    or complicated image eat up lot CPU.
+    
+2.5. Update Drawing Data
+
+    Via presentaion space 'hpsDraw', you can update contents of shape
+    window.
+
+    You can draw anything on presetation space 'hpsDraw'. To update
+    new images on 'hpsDraw' to shape window, send following message to
+    shape window.
+
+    SHAPEWIN_MSG_UPDATE     Request to update window contents
+    
+        param1          PRECTL      update region
+	param2          NULL
+
+    Only a part of 'hpsDraw' was changed, and want to avoid unneccesary
+    drawing, specify update region to restrict window updates. Update
+    region may NULL, in this case, shape window redraw entire area.
+    Redraw on shape window is quite a heavy processing, your should
+    specify update region.
+
+        But if your CPU & Video board fast enough, redrawing entire
+        region  may be faster.
+
+3. Combination with Frame Window
+    
+    Contents of this section is so called 'VooDoo'.  Following methods
+    works for my environment (Warp3/Connect), but I am not sure they
+    works other environments.  If these methods bot worked on your
+    environments, or if you know more good methods, let me know.
+
+    If you use shape window, you want to draw some images on desktop
+    direct (not in another window).  For this, you should create shape
+    window as child of desktop window.  But shape window does not have
+    frame functions, use shape window as top level window is dangerous.
+    So you should create shape window with
+
+        Parent Window       DESKTOP (HWND_DESKTOP)
+        Owner Window        frame window
+    
+    If you create frame & shape window as above, there is no parent/
+    child releation between frame and shape.  In this case, some
+    controls usually worked between frame and client does not works.
+    To enable such controls, you should customize (sub-class) frame
+    window processing.
+    
+    Also, if you create frame & shape as above, both frame and shape
+    window appear on desktop.  To hide frame window (to use non-
+    rectangular drawing are on desktop), you should customize frame
+    window, too.
+
+3.1. Relay Frame Control Messages
+
+    If size, position, or Z-order of frame window was changed, following
+    frame window procedure receives following messages.
+    
+        WM_ADJUSTWINDOWPOS      before change
+	WM_WINDOWPOSCHANGED     after  change
+
+    To follow shape window's position, Z-order to frame window, hook
+    these messages and control shape window's position / Z-order, such
+    as
+
+        case WM_ADJUSTWINDOWPOS :
+	    pswp = (PSWP) PVOIDFROMMP(mp1) ;
+	    WinSetWindowPos(hwndShape, pswp->hwndInsetBehind,
+	            pswp->x, pswp->y, pswp->cx, pswp->cy, pswp->fl) ;
+            return defaultFrameProc(...) ;
+
+    or
+    
+        case WM_WINDOWPOSCHANGED :
+	    pswp = (PSWP) PVOIDFROMMP(mp1) ;
+	    WinSetWindowPos(hwndShape, pswp->hwndInsetBehind,
+	            pswp->x, pswp->y, pswp->cx, pswp->cy, pswp->fl) ;
+            return defaultFrameProc(...) ;
+
+    But WM_WINDOWPOSCHANGED will never happen if you make frame window
+    invisible (describe in next section).
+
+    See sample codes for more deatils.
+
+3.2. Invisible Frame Window
+
+    Create frame and shape window, but not to show frame window, you can
+    make frame window invisible.
+    
+    To do this, hook 'WM_ADJUSTWINDOWPOS' message and modify SWP data.
+
+        case WM_ADJUSTWINDOWPOS :
+	    pswp = (PSWP) PVOIDFROMMP(mp1) ;
+	    WinSetWindowPos(hwndShape, pswp->hwndInsetBehind,
+	            pswp->x, pswp->y, pswp->cx, pswp->cy, pswp->fl) ;
+            pswp->fl &= ~SWP_SHOW ;
+            return defaultFrameProc(...) ;
+
+    Also you can make frame window to fixed size as
+
+        case WM_ADJUSTWINDOWPOS :
+	    pswp = (PSWP) PVOIDFROMMP(mp1) ;
+	    WinSetWindowPos(hwndShape, pswp->hwndInsetBehind,
+	            pswp->x, pswp->y, pswp->cx, pswp->cy, pswp->fl) ;
+            pswp->cx = fixed_width  ;
+            pswp->cy = fixed_height ;
+            pswp->fl &= ~SWP_SHOW ;
+            return defaultFrameProc(...) ;
+
+    See sample codes (trbitmap.c, tranime.c) for more deatils.
+
+3.3. Notify Key & Mouse Events
+
+    Key and mouse events in shape window will send to it's owner (frame
+    window).  So if you want to control on such event, you should
+    implement such code on (customized) frame window procedure.
+
+    For mouse related messages, mouse position is set in their parameter.
+    But if they are transferred from shape window, those positions are
+    relative to small windows wich contruct shape window itself, and not
+    adjusted to frame window relative.
+
+    If you need mouse positions, use 'WinQueryPointerPos' to acquire
+    correct mouse locations.
+
+    See sample codes (trbitmap.c, treyes.c) for more details.

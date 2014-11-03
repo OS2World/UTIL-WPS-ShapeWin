@@ -1,0 +1,16 @@
+/*
+ * treyes.rc - resources for Eye
+ */
+
+#include <os2.h>
+#include "treyeres.h"
+
+ICON    ID_TREYES       treyes.ico
+
+MENU    IDM_POPUP
+BEGIN
+    MENUITEM    "~Move",    IDM_MOVE
+    MENUITEM    "~Size",    IDM_SIZE
+    MENUITEM    "~Hide",    IDM_HIDE
+    MENUITEM    "E~xit",    IDM_EXIT
+END
