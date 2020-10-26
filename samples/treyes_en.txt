@@ -29,8 +29,6 @@ DESCRIPTION
         +-----+
 	|Size |         Resize Eyes
         +-----+
-	|Hide |         Hide Eyes
-        +-----+
         |Exit |         terminate Program
         +-----+
     

@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 
 #define INCL_PM
-#include <Os2.h>
+#include <os2.h>
 
 #include "bmpload.h"
 

@@ -1,6 +1,8 @@
 /*
  * shapewin.c - Shape Window Control
  *
+ *  version 2.00 - changed linsece GPL to LGPL.
+ *                 included bug fix from "Masami Kitamura <masamik@attglobal.net>"
  *  version 1.02 - include speedup patch from "Ulrich Moeller (ulrich.moeller@rz.hu-berlin.de)"
  *  version 1.01 - include speedup patch from "Takayuki Suwa (jjsuwa@ibm.net)"
  *                 add some mouse events send to owner
@@ -370,7 +372,11 @@ static  int     ShpMakeRegion(SHPCTLPTR pCtrl, HPS hpsMask)
     apt[2].x = 0 ;          /* Source       */
     apt[2].y = 0 ;
 
-    if (GpiBitBlt(hps, pCtrl->hpsDraw, 3, apt, ROP_SRCCOPY, 0) == GPI_ERROR) {
+    /* Mr.Kitamura <masamik@attglobal.net> said there's bug in          */
+    /* following code.  Original code uses pCtrl->hpsDraw to create     */
+    /* mask pattern, but obviously, it is wrong.  It should be hpsMask. */
+     
+    if (GpiBitBlt(hps, hpsMask, 3, apt, ROP_SRCCOPY, 0) == GPI_ERROR) {
         TRACE("MakeRect - BitBlt Failed %08x, hdc %08x, hps %08x, hbm %08x\n",
                 WinGetLastError(hab), hdc, hps, hbm) ;
     }
@@ -685,6 +691,15 @@ static  void    ShpTerm(SHPCTLPTR pCtrl)
     }
     ShpFreeRegion(pCtrl) ;
     free(pCtrl) ;
+}
+
+/*
+ * Register ShapeWindow
+ */
+
+BOOL	ShapeWinInit(HAB hab)
+{
+    return WinRegisterClass(hab, ShapeWinName, ShapeWinProc, 0L, sizeof(PVOID)) ;
 }
 
 /*

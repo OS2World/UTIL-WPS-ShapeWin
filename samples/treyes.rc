@@ -11,6 +11,5 @@ MENU    IDM_POPUP
 BEGIN
     MENUITEM    "~Move",    IDM_MOVE
     MENUITEM    "~Size",    IDM_SIZE
-    MENUITEM    "~Hide",    IDM_HIDE
     MENUITEM    "E~xit",    IDM_EXIT
 END

@@ -7,14 +7,16 @@ NAME
 
 SYNOPSIS
 
-    trbitmap bitmap-file
+    trbitmap [ -ontop ] bitmap-file
 
 DESCRIPTION
 
     Show bitmap on your desktop with transparent background.  It assumes
     color of lower left corner (0, 0) as background color, and pixels
     having same color as background.  As result, picture other than
-    background color will appear on your desktop.
+    background color will appear on your desktop.  If you given "-ontop"
+    option, then picture is displayed always on top of the desktop.  But
+    it causes some trouble on screen lock.
 
     You can control this program by
 
@@ -27,8 +29,6 @@ DESCRIPTION
     
     From menu, you can
 
-        +-----+
-	|Hide |         Hide Window (picture)
         +-----+
         |Exit |         terminate Program
         +-----+

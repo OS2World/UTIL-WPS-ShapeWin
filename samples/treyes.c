@@ -10,7 +10,7 @@
 #define INCL_PM
 #include <os2.h>
 
-#include "shapewin.h"
+#include <shapewin.h>
 
 #include "treyes.h"
 #include "treyeres.h"
@@ -642,9 +642,6 @@ static MRESULT EXPENTRY procFrame(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    fsResize = TRUE ;
 	    WinSetCapture(HWND_DESKTOP, hwnd) ;
 	    WinQueryPointerPos(HWND_DESKTOP, &ptResize) ;
-	    return (MRESULT) 0 ;
-	case IDM_HIDE :
-	    WinShowWindow(hwnd, FALSE) ;
 	    return (MRESULT) 0 ;
 	case IDM_EXIT :
 	    WinShowWindow(hwnd, FALSE) ;

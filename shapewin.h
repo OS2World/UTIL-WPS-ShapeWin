@@ -22,7 +22,13 @@ typedef struct _SHAPEWIN {
 } SHAPEWIN, *PSHAPEWIN ;
 
 /*
- * Window Procedure for Image Window Control
+ * Register Shape Window Control
+ */
+
+BOOL    ShapeWinInit(HAB hab) ;
+
+/*
+ * Window Procedure for Shape Window Control
  */
  
 MRESULT EXPENTRY ShapeWinProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) ;

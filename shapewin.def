@@ -1,0 +1,8 @@
+; shapewin.def (emx/gcc)
+LIBRARY SHAPEWIN
+DESCRIPTION 'Shape Window Library, Version 2.00'
+EXPORTS
+	ShapeWinInit	@1
+	ShapeWinProc	@2
+DATA
+    MULTIPLE NONSHARED

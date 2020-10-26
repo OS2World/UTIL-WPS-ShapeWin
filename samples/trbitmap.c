@@ -9,7 +9,7 @@
 #define INCL_PM
 #include <os2.h>
 
-#include "shapewin.h"
+#include <shapewin.h>
 #include "bmpload.h"
 
 #include "trbitmap.h"
@@ -125,9 +125,14 @@ static  void    freeBitmap(void)
 static  PFNWP   pfnFrame ;
 static MRESULT EXPENTRY procFrame(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) ;
 
-static  void    createFrame(HAB hab)
+#ifndef WS_TOPMOST
+#define WS_TOPMOST  0x00200000
+#endif
+
+static  void    createFrame(HAB hab, BOOL ontop)
 {
-    FRAMECDATA  fcd    ;
+    FRAMECDATA  fcd ;
+    ULONG       style = 0  ;
     UCHAR       title[256] ;
 
     memset(&fcd, 0, sizeof(fcd)) ;
@@ -138,11 +143,15 @@ static  void    createFrame(HAB hab)
 
     sprintf(title, "%s [%s]", ProgramName, pszBitmap) ;
     
+    if (ontop) {
+        style |= WS_TOPMOST ;
+    }
+
     hwndFrame = WinCreateWindow(
             HWND_DESKTOP,           /* Parent window handle     */
             WC_FRAME,               /* Frame Window Class       */
             title,                  /* as Title                 */
-            0,                      /* Window Style             */
+            style,                  /* Window Style             */
             0, 0, 0, 0,             /* Position & size          */
             NULLHANDLE,             /* Owner Window             */
             HWND_TOP,               /* Z-Order                  */
@@ -164,10 +173,11 @@ static  void    createFrame(HAB hab)
  * createShape - create shape window
  */
 
-static  void    createShape(HAB hab)
+static  void    createShape(HAB hab, BOOL ontop)
 {
     BITMAPINFOHEADER2   bmi ;
     SHAPEWIN    shpctrl ;
+    ULONG       style = 0 ;
     
     if (hwndFrame == NULLHANDLE) {
         return ;
@@ -193,11 +203,15 @@ static  void    createShape(HAB hab)
     shpctrl.hpsDraw = hpsBitmap ;
     shpctrl.hpsMask = hpsBitmap ;
     
+    if (ontop) {
+        style |= WS_TOPMOST ;
+    }
+
     hwndShape = WinCreateWindow(
             HWND_DESKTOP,           /* Parent Window    */
             ShapeWinName,           /* Window Class     */
 	    NULL,                   /* Window Text      */
-	    0,                      /* Window Style     */
+	    style,                  /* Window Style     */
 	    0, 0, 0, 0,             /* Pos & Size       */
 	    hwndFrame,              /* Owner Window     */
 	    HWND_TOP,               /* Z-Order          */
@@ -272,7 +286,7 @@ static  void    contextMenu(void)
 	     PU_KEYBOARD | PU_MOUSEBUTTON1 | PU_MOUSEBUTTON2 ;
 
     WinPopupMenu(HWND_DESKTOP, hwndFrame, hwndPopup, 
-                                pt.x, pt.y, IDM_HIDE, opts) ;
+                                pt.x, pt.y, IDM_EXIT, opts) ;
 }
  
 /*
@@ -314,14 +328,11 @@ static MRESULT EXPENTRY procFrame(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         return (MRESULT) 0 ;
 	
     case WM_COMMAND :
-        switch (SHORT1FROMMP(mp1)) {
-	case IDM_HIDE :
-	    WinShowWindow(hwnd, FALSE) ;
-	    return (MRESULT) 0 ;
-	case IDM_EXIT :
+        if (SHORT1FROMMP(mp1) == IDM_EXIT) {
 	    WinPostMsg(hwnd, WM_CLOSE, NULL, NULL) ;
 	    return (MRESULT) 0 ;
         }
+	return (MRESULT) 0 ;
     }
     return (*pfnFrame) (hwnd, msg, mp1, mp2) ;
 }
@@ -336,6 +347,7 @@ int     main(int ac, char *av[])
     HMQ     hmq  ;
     QMSG    qmsg ;
     int     i    ;
+    BOOL    ontop = FALSE ;
     UCHAR   msg[256] ;
 
     myname(av[0]) ;
@@ -349,9 +361,10 @@ int     main(int ac, char *av[])
      */
      
     for (i = 1, pszBitmap = NULL ; i < ac ; i++) {
-        if (pszBitmap == NULL) {
+        if (stricmp(av[i], "-ontop") == 0) {
+	    ontop = TRUE ;
+	} else if (pszBitmap == NULL) {
 	    pszBitmap = av[i] ;
-	    break ;
 	}
     }
     if (pszBitmap == NULL) {
@@ -377,8 +390,8 @@ int     main(int ac, char *av[])
      * Start Window Processing
      */
 
-    createFrame(hab) ;
-    createShape(hab) ;
+    createFrame(hab, ontop) ;
+    createShape(hab, ontop) ;
 
     if (hwndFrame == NULLHANDLE || hwndShape == NULLHANDLE) {    
         trMessage("failed to create windows") ;

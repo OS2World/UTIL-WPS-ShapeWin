@@ -9,6 +9,5 @@ ICON    ID_TRBITMAP     trbitmap.ico
 
 MENU    IDM_POPUP
 BEGIN
-    MENUITEM    "~Hide",    IDM_HIDE
     MENUITEM    "E~xit",    IDM_EXIT
 END

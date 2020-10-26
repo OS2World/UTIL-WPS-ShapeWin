@@ -2,90 +2,78 @@
 # Makefile for Shape Window Control & Sample Programs
 #
 
-CC	= gcc -c
-CFLAGS	= -Zmtd -O2
-LD	= gcc
-LDFLAGS	= -s -Zmtd
-EMXPATH = D:\emx
-
-LIBS	=
-
 #
-# Inference Rules
-#
-.c.o :
-	$(CC) $(CFLAGS) $*.c
-
-#
-# Target to Build
+# Directories to install
 #
 
-TARGET = trbitmap.exe tranime.exe treyes.exe
-
-all : $(TARGET)
+prefix = @prefix@
+bindir = $(prefix)/bin
+dlldir = $(prefix)/dll
+libdir = $(prefix)/lib
+hdrdir = $(prefix)/include
 
 #
-# Shape Window Control
+# Tools to build DLL and Import Library
 #
 
+CC     = gcc
+CFLAGS = -O2 -Zomf -Zcrtdll -Zmt
+
+.SUFFIXES: .obj .o
+
+#
+# Build Shape Window Control
+#
+
+all : library samples
+
+library : shapewin.dll shapewin.a shapewin.lib
+samples : trbitmap.exe tranime.exe treyes.exe
+
+SHDEFS = shapewin.def
 SHSRCS = shapewin.c
-SHOBJS = shapewin.o
+SHOBJS = shapewin.obj
 
-shapewin.o : shapewin.c shapewin.h
+shapewin.obj : shapewin.c shapewin.h
+	$(CC) -c $(CFLAGS)  shapewin.c
 
-#
-# Bitmap Manipulation Library
-#
+shapewin.dll : $(SHOBJS) $(SHDEFS)
+	$(CC) -Zdll $(CFLAGS) -o $@ $(SHOBJS) shapewin.def
 
-BLSRCS = bmpload.c
-BLOBJS = bmpload.o
+shapewin.lib : $(SHDEFS)
+	rm -f shapewin.lib
+	emximp -o shapewin.lib shapewin.def
 
-bmpload.o : bmpload.c bmpload.h
-
-#
-# Display Bitmap with Transparent Background
-#
-
-BMSRCS = trbitmap.c
-BMOBJS = trbitmap.o
-BMLIBS = shapewin.o bmpload.o
-
-trbitmap.exe : $(BMOBJS) $(BMLIBS) trbitmap.def trbitmap.res
-	$(LD) $(LDFLAGS) -o trbitmap.exe trbitmap.def trbitmap.res $(BMOBJS) $(BMLIBS) $(LIBS)
-
-trbitmap.res : trbitmap.rc trbitres.h trbitmap.ico
-	rc -r -i $(EMXPATH)\include trbitmap.rc
-
-trbitmap.o : trbitmap.c trbitmap.h trbitres.h shapewin.h bmpload.h
+shapewin.a : $(SHDEFS)
+	rm -f shapewin.a
+	emximp -o shapewin.a shapewin.def
 
 #
-# Animate Bitmaps with Transparent Background
+# Sample Programs
 #
 
-ANSRCS = tranime.c
-ANOBJS = tranime.o
-ANLIBS = shapewin.o bmpload.o
-
-tranime.exe : $(ANOBJS) $(ANLIBS) tranime.def tranime.res
-	$(LD) $(LDFLAGS) -o tranime.exe tranime.def tranime.res $(ANOBJS) $(ANLIBS) $(LIBS)
-
-tranime.res : tranime.rc tranires.h tranime.ico
-	rc -r -i $(EMXPATH)\include tranime.rc
-
-tranime.o : tranime.c tranime.h tranires.h shapewin.h bmpload.h
+samples : force
+	(cd samples && $(MAKE) samples && cd ..)
 
 #
-# PM-Eyes with transparent background
+# Install to the System
 #
 
-EYSRCS = treyes.c
-EYOBJS = treyes.o
-EYLIBS = shapewin.o
+install : library force
+	cp -i shapewin.h   $(hdrdir)
+	cp -i shapewin.dll $(dlldir)
+	cp -i shapewin.lib $(libdir)
+	cp -i shapewin.a   $(libdir)
 
-treyes.exe : $(EYOBJS) $(EYLIBS) treyes.def treyes.res
-	$(LD) $(LDFLAGS) -o treyes.exe treyes.def treyes.res $(EYOBJS) $(EYLIBS) $(LIBS)
+#
+# Cleanup
+#
+clean : force
+	rm -f *.obj *.lib *.a *.dll core
+	(cd samples && $(MAKE) clean && cd ..)
 
-treyes.res : treyes.rc treyeres.h treyes.ico
-	rc -r -i $(EMXPATH)\include treyes.rc
+#
+# force to do
+#
+force :
 
-treyes.o : treyes.c treyes.h treyeres.h shapewin.h

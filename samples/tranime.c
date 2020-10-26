@@ -9,7 +9,7 @@
 #define INCL_PM
 #include <os2.h>
 
-#include "shapewin.h"
+#include <shapewin.h>
 #include "bmpload.h"
 
 #include "tranime.h"
